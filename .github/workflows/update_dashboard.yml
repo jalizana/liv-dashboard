@@ -1,1 +1,37 @@
+name: Actualizar dashboard financiero
 
+on:
+  push:
+    paths:
+      - 'data/**.xlsx'
+      - 'data/**.csv'
+      - 'scripts/parse_finances.py'
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependencias
+        run: pip install openpyxl
+
+      - name: Generar data.json
+        run: python scripts/parse_finances.py
+
+      - name: Commit data.json actualizado
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data.json
+          git diff --staged --quiet || git commit -m "auto: actualizar data.json [$(date '+%Y-%m-%d')]"
+          git push
