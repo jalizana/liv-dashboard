@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LIV — Dashboard Financiero</title>
+<meta name="robots" content="noindex, nofollow">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #ffffff; --bg2: #f7f7f5; --bg3: #f0efe8;
+    --text: #1a1a18; --text2: #5f5e5a; --text3: #888780;
+    --border: rgba(0,0,0,.1); --border2: rgba(0,0,0,.18);
+    --green: #3B6D11; --green-bg: #EAF3DE; --green-light: #97C459;
+    --blue: #185FA5; --blue-bg: #E6F1FB; --blue-light: #378ADD;
+    --red: #A32D2D; --red-bg: #FCEBEB;
+    --amber: #854F0B; --amber-bg: #FAEEDA;
+    --radius: 8px; --radius-lg: 12px;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1a; --bg2: #252522; --bg3: #2e2e2b;
+      --text: #f0efe8; --text2: #b4b2a9; --text3: #888780;
+      --border: rgba(255,255,255,.1); --border2: rgba(255,255,255,.2);
+      --green: #97C459; --green-bg: #173404;
+      --blue: #85B7EB; --blue-bg: #042C53;
+      --red: #F09595; --red-bg: #501313;
+      --amber: #EF9F27; --amber-bg: #412402;
+    }
+  }
+
+  body { font-family: var(--font); background: var(--bg3); color: var(--text); min-height: 100vh; }
+
+  /* LOGIN */
+  #login-screen {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem;
+  }
+  .login-card {
+    background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg);
+    padding: 2rem 2.5rem; width: 100%; max-width: 380px;
+  }
+  .login-logo {
+    font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 4px; letter-spacing: -.02em;
+  }
+  .login-sub { font-size: 13px; color: var(--text3); margin-bottom: 2rem; }
+  .login-label { font-size: 12px; color: var(--text2); margin-bottom: 6px; display: block; }
+  .login-input {
+    width: 100%; padding: 10px 12px; font-size: 14px; font-family: var(--font);
+    background: var(--bg2); border: 0.5px solid var(--border2); border-radius: var(--radius);
+    color: var(--text); outline: none; margin-bottom: 1rem;
+  }
+  .login-input:focus { border-color: var(--blue-light); box-shadow: 0 0 0 3px var(--blue-bg); }
+  .login-btn {
+    width: 100%; padding: 10px; font-size: 14px; font-weight: 500; font-family: var(--font);
+    background: var(--text); color: var(--bg); border: none; border-radius: var(--radius);
+    cursor: pointer; transition: opacity .15s;
+  }
+  .login-btn:hover { opacity: .85; }
+  .login-error { font-size: 12px; color: var(--red); margin-top: 8px; display: none; }
+
+  /* DASHBOARD */
+  #app { display: none; }
+  .topbar {
+    background: var(--bg); border-bottom: 0.5px solid var(--border);
+    padding: 0 2rem; height: 56px; display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 10;
+  }
+  .topbar-brand { font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: -.01em; }
+  .topbar-brand span { font-weight: 400; color: var(--text3); font-size: 13px; margin-left: 8px; }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .tag { font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 500; }
+  .tag-internal { background: var(--amber-bg); color: var(--amber); }
+  .logout-btn {
+    font-size: 12px; color: var(--text3); cursor: pointer; padding: 4px 8px;
+    border: 0.5px solid var(--border); border-radius: var(--radius); background: transparent;
+    font-family: var(--font);
+  }
+  .logout-btn:hover { color: var(--text); }
+
+  .main { max-width: 1100px; margin: 0 auto; padding: 2rem; }
+
+  /* PERIOD SELECTOR */
+  .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: gap; gap: 12px; }
+  .toolbar-title { font-size: 18px; font-weight: 500; color: var(--text); }
+  .btn-group { display: flex; gap: 4px; }
+  .pbtn {
+    padding: 6px 14px; font-size: 12px; font-weight: 500; font-family: var(--font);
+    border: 0.5px solid var(--border2); border-radius: var(--radius);
+    background: transparent; color: var(--text2); cursor: pointer; transition: all .15s;
+  }
+  .pbtn:hover { background: var(--bg2); color: var(--text); }
+  .pbtn.active { background: var(--bg2); color: var(--text); border-color: var(--border2); font-weight: 600; }
+
+  /* METRIC CARDS */
+  .metrics { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; margin-bottom: 1.5rem; }
+  @media (max-width: 700px) { .metrics { grid-template-columns: repeat(2, 1fr); } }
+  .metric { background: var(--bg2); border-radius: var(--radius); padding: 1rem; }
+  .metric-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+  .metric-value { font-size: 24px; font-weight: 500; color: var(--text); }
+  .metric-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+  .positive { color: var(--green) !important; }
+  .negative { color: var(--red) !important; }
+
+  /* GRID 2 cols */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  @media (max-width: 800px) { .grid2 { grid-template-columns: 1fr; } }
+
+  /* CARDS */
+  .card {
+    background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg);
+    padding: 1.25rem;
+  }
+  .card-title { font-size: 12px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 1rem; }
+
+  /* SEG BUTTONS */
+  .seg-group { display: flex; gap: 4px; margin-bottom: 1rem; flex-wrap: wrap; }
+  .sbtn {
+    padding: 4px 10px; font-size: 11px; font-weight: 500; font-family: var(--font);
+    border: 0.5px solid var(--border); border-radius: 20px;
+    background: transparent; color: var(--text2); cursor: pointer; transition: all .15s;
+  }
+  .sbtn:hover { background: var(--bg2); }
+  .sbtn.active { background: var(--green-bg); color: var(--green); border-color: var(--green-light); }
+
+  /* LEGEND */
+  .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 10px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text2); }
+  .legend-swatch { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+  /* BARS */
+  .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .bar-label { font-size: 12px; color: var(--text2); width: 190px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar-track { flex: 1; height: 8px; background: var(--bg2); border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; transition: width .4s cubic-bezier(.4,0,.2,1); }
+  .bar-pct { font-size: 11px; color: var(--text3); width: 36px; text-align: right; flex-shrink: 0; }
+  .bar-val { font-size: 11px; color: var(--text2); width: 72px; text-align: right; flex-shrink: 0; }
+
+  /* RESULTS TABLE */
+  .res-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 8px 0; border-bottom: 0.5px solid var(--border); font-size: 13px; color: var(--text2);
+  }
+  .res-row:last-child { border-bottom: none; }
+  .res-row.subtotal { color: var(--text); font-weight: 500; }
+  .res-row.total { color: var(--text); font-weight: 600; font-size: 14px; padding: 10px 0; }
+  .res-row.spacer { padding: 4px 0; border-bottom: none; }
+
+  /* DONUT */
+  #donut-wrap { position: relative; width: 100%; height: 220px; }
+  #donutLegend { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+  .donut-leg-row { display: flex; align-items: center; justify-content: space-between; font-size: 12px; }
+  .donut-leg-left { display: flex; align-items: center; gap: 6px; color: var(--text2); }
+  .donut-leg-right { color: var(--text3); }
+
+  /* COMPARE */
+  .compare-wrap { position: relative; width: 100%; height: 240px; }
+
+  .section-gap { margin-bottom: 1.5rem; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">LIV</div>
+    <div class="login-sub">Dashboard financiero interno</div>
+    <label class="login-label">Contraseña</label>
+    <input type="password" class="login-input" id="pwd" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Ingresar</button>
+    <div class="login-error" id="login-err">Contraseña incorrecta</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-brand">LIV Administración<span>/ Dashboard financiero</span></div>
+    <div class="topbar-right">
+      <span class="tag tag-internal">Solo uso interno</span>
+      <button class="logout-btn" onclick="doLogout()">Salir</button>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <div class="toolbar">
+      <div class="toolbar-title" id="period-title">Marzo 2026</div>
+      <div class="btn-group">
+        <button class="pbtn" onclick="setPeriod('ene',this)">Enero</button>
+        <button class="pbtn" onclick="setPeriod('feb',this)">Febrero</button>
+        <button class="pbtn active" onclick="setPeriod('mar',this)">Marzo</button>
+        <button class="pbtn" onclick="setPeriod('acum',this)">Acumulado</button>
+      </div>
+    </div>
+
+    <!-- METRICS -->
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-label">Ingresos</div>
+        <div class="metric-value" id="m-ing">$0</div>
+        <div class="metric-sub" id="m-ing-sub">&nbsp;</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Gastos totales</div>
+        <div class="metric-value" id="m-gas">$0</div>
+        <div class="metric-sub" id="m-gas-sub">&nbsp;</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Result. antes imp.</div>
+        <div class="metric-value" id="m-rai">$0</div>
+        <div class="metric-sub" id="m-rai-sub">&nbsp;</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Resultado neto</div>
+        <div class="metric-value" id="m-rn">$0</div>
+        <div class="metric-sub" id="m-rn-sub">&nbsp;</div>
+      </div>
+    </div>
+
+    <!-- ROW 1: Ingresos + Resultados -->
+    <div class="grid2 section-gap">
+
+      <div class="card">
+        <div class="card-title">Ingresos por tipo de cliente</div>
+        <div class="seg-group">
+          <button class="sbtn active" onclick="setSeg('all',this)">Todos</button>
+          <button class="sbtn" onclick="setSeg('res',this)">Residencial</button>
+          <button class="sbtn" onclick="setSeg('ofi',this)">Oficinas</button>
+          <button class="sbtn" onclick="setSeg('con',this)">Condominios</button>
+        </div>
+        <div class="legend" id="ing-legend"></div>
+        <div style="position:relative;width:100%;height:200px">
+          <canvas id="ingChart" role="img" aria-label="Ingresos por tipo de cliente">Ingresos LIV 2026.</canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Estado de resultados</div>
+        <div id="result-table"></div>
+      </div>
+
+    </div>
+
+    <!-- ROW 2: Gastos + Comparativo -->
+    <div class="grid2 section-gap">
+
+      <div class="card">
+        <div class="card-title">Composición de gastos</div>
+        <div id="gasto-bars"></div>
+        <div id="donut-wrap" style="display:none">
+          <canvas id="donutChart" role="img" aria-label="Composición de gastos por categoría">Gastos LIV.</canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Comparativo de períodos</div>
+        <div class="legend" id="comp-legend">
+          <span class="legend-item"><span class="legend-swatch" style="background:#378ADD"></span>Ingresos</span>
+          <span class="legend-item"><span class="legend-swatch" style="background:#D85A30"></span>Gastos</span>
+          <span class="legend-item"><span class="legend-swatch" style="background:#3B6D11"></span>Resultado</span>
+        </div>
+        <div class="compare-wrap">
+          <canvas id="compChart" role="img" aria-label="Comparativo ingresos gastos y resultado por mes">Comparativo mensual LIV.</canvas>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+/* ── AUTH ── */
+const HASH = 'c0e1f08b2dcb5d05911c5c648a0514060896188695fc85322423735bfd0f9062'; /* admin */
+async function sha256(msg) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function doLogin() {
+  const pwd = document.getElementById('pwd').value;
+  const h = await sha256(pwd);
+  if(h === HASH) {
+    sessionStorage.setItem('liv_auth','1');
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='block';
+    initDashboard();
+  } else {
+    document.getElementById('login-err').style.display='block';
+    document.getElementById('pwd').value='';
+  }
+}
+function doLogout() {
+  sessionStorage.removeItem('liv_auth');
+  location.reload();
+}
+if(sessionStorage.getItem('liv_auth')==='1') {
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+}
+
+/* ── DATA ── */
+const PERIODOS = ['Enero','Febrero','Marzo'];
+const DATA = {
+  ingresos: { res:[0,0,430283], ofi:[0,0,0], con:[0,0,0] },
+  gastos: {
+    ene: {},
+    feb: {},
+    mar: {
+      'Software y plataformas':19990,
+      'Combustible / movilización':47638,
+      'Materiales y suministros':5034,
+      'Comisiones bancarias':419,
+      'Intereses y cargos':108,
+      'IVA no recuperable':7409,
+      'PPM del ejercicio':538,
+      'Sin respaldo tributario':500
+    }
+  },
+  ppm: { ene:0, feb:0, mar:538 }
+};
+DATA.ingresos.acum = { res:DATA.ingresos.res, ofi:DATA.ingresos.ofi, con:DATA.ingresos.con };
+DATA.gastos.acum = Object.assign({}, DATA.gastos.mar);
+DATA.ppm.acum = DATA.ppm.mar;
+
+const SEG_LABELS = { res:'Residencial', ofi:'Oficinas', con:'Condominios' };
+const SEG_COLORS = { res:'#1D9E75', ofi:'#378ADD', con:'#BA7517' };
+const BAR_PALETTE = ['#534AB7','#1D9E75','#D85A30','#378ADD','#BA7517','#D4537E','#888780','#0F6E56'];
+const PERIOD_LABELS = { ene:'Enero 2026', feb:'Febrero 2026', mar:'Marzo 2026', acum:'Acumulado 2026' };
+
+let currentP = 'mar', currentSeg = 'all';
+let ingChart = null, compChart = null;
+
+/* ── HELPERS ── */
+function fmtShort(v) {
+  if(v===0) return '$0';
+  const a = Math.abs(v);
+  const s = v<0?'-':'';
+  if(a>=1000000) return s+'$'+(a/1000000).toFixed(1)+'M';
+  if(a>=1000) return s+'$'+Math.round(a/1000)+'K';
+  return s+'$'+Math.round(a).toLocaleString('es-CL');
+}
+function fmtFull(v) {
+  const s = v<0?'-$':'$';
+  return s+Math.abs(Math.round(v)).toLocaleString('es-CL');
+}
+function getIng(p, seg) {
+  const segs = seg==='all'?['res','ofi','con']:[seg];
+  if(p==='acum') return segs.reduce((s,k)=>s+DATA.ingresos[k].reduce((a,b)=>a+b,0),0);
+  const i={ene:0,feb:1,mar:2}[p];
+  return segs.reduce((s,k)=>s+DATA.ingresos[k][i],0);
+}
+function getGas(p) { return Object.values(DATA.gastos[p]||{}).reduce((a,b)=>a+b,0); }
+
+/* ── RENDER ── */
+function setPeriod(p, btn) {
+  currentP=p;
+  document.querySelectorAll('.pbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('period-title').textContent=PERIOD_LABELS[p];
+  render();
+}
+function setSeg(s, btn) {
+  currentSeg=s;
+  document.querySelectorAll('.sbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderIngChart();
+}
+
+function render() {
+  renderMetrics();
+  renderIngChart();
+  renderGastos();
+  renderResults();
+  renderCompChart();
+}
+
+function renderMetrics() {
+  const ing=getIng(currentP,'all'), gas=getGas(currentP);
+  const imp=DATA.ppm[currentP]||0;
+  const rai=ing-gas+imp, rn=ing-gas;
+  document.getElementById('m-ing').textContent=fmtFull(ing);
+  document.getElementById('m-gas').textContent=fmtFull(gas);
+  document.getElementById('m-rai').textContent=fmtFull(rai);
+  document.getElementById('m-rai').className='metric-value'+(rai>=0?' positive':' negative');
+  document.getElementById('m-rn').textContent=fmtFull(rn);
+  document.getElementById('m-rn').className='metric-value'+(rn>=0?' positive':' negative');
+  document.getElementById('m-gas-sub').textContent=gas>0&&ing>0?Math.round(gas/ing*100)+'% sobre ingresos':'—';
+  document.getElementById('m-rn-sub').textContent=ing>0?Math.round(rn/ing*100)+'% margen':'—';
+  document.getElementById('m-rai-sub').textContent=imp>0?'PPM '+fmtFull(imp):'sin impuesto';
+}
+
+function renderIngChart() {
+  const segs=currentSeg==='all'?['res','ofi','con']:[currentSeg];
+  const isDark=matchMedia('(prefers-color-scheme: dark)').matches;
+  const gridC=isDark?'rgba(255,255,255,.08)':'rgba(0,0,0,.07)';
+  const tickC=isDark?'#888780':'#888780';
+
+  let labels, datasets;
+  if(currentP==='acum') {
+    labels=PERIODOS;
+    datasets=segs.map(s=>({
+      label:SEG_LABELS[s], data:DATA.ingresos[s],
+      backgroundColor:SEG_COLORS[s], borderWidth:0, borderRadius:3
+    }));
+  } else {
+    const idx={ene:0,feb:1,mar:2}[currentP];
+    labels=[PERIODOS[idx]];
+    datasets=segs.map(s=>({
+      label:SEG_LABELS[s], data:[DATA.ingresos[s][idx]],
+      backgroundColor:SEG_COLORS[s], borderWidth:0, borderRadius:3
+    }));
+  }
+
+  document.getElementById('ing-legend').innerHTML=segs.map(s=>
+    `<span class="legend-item"><span class="legend-swatch" style="background:${SEG_COLORS[s]}"></span>${SEG_LABELS[s]}: ${fmtFull(getIng(currentP,s))}</span>`
+  ).join('');
+
+  if(ingChart) ingChart.destroy();
+  ingChart=new Chart(document.getElementById('ingChart'),{
+    type:'bar',
+    data:{labels,datasets},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmtFull(c.raw)}}},
+      scales:{
+        x:{stacked:true,grid:{display:false},ticks:{color:tickC,font:{size:11}},border:{display:false}},
+        y:{stacked:true,beginAtZero:true,grid:{color:gridC},ticks:{color:tickC,font:{size:11},callback:v=>fmtShort(v)},border:{display:false}}
+      }
+    }
+  });
+}
+
+function renderGastos() {
+  const g=DATA.gastos[currentP]||{};
+  const total=Object.values(g).reduce((a,b)=>a+b,0);
+  const sorted=Object.entries(g).sort((a,b)=>b[1]-a[1]);
+  const el=document.getElementById('gasto-bars');
+  if(!sorted.length){
+    el.innerHTML='<div style="font-size:13px;color:var(--text3);padding:1rem 0">Sin gastos registrados en este período</div>';
+    return;
+  }
+  el.innerHTML=sorted.map(([k,v],i)=>`
+    <div class="bar-row">
+      <div class="bar-label" title="${k}">${k}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${total>0?Math.round(v/total*100):0}%;background:${BAR_PALETTE[i%BAR_PALETTE.length]}"></div></div>
+      <div class="bar-pct">${total>0?(v/total*100).toFixed(1):'0'}%</div>
+      <div class="bar-val">${fmtFull(v)}</div>
+    </div>`).join('');
+}
+
+function renderResults() {
+  const ing=getIng(currentP,'all'), gas=getGas(currentP);
+  const imp=DATA.ppm[currentP]||0;
+  const gasOp=gas-imp;
+  const rai=ing-gasOp, rn=ing-gas;
+  const rows=[
+    {label:'Ingresos', val:ing, cls:'subtotal'},
+    {label:'Gastos operacionales', val:-gasOp, cls:''},
+    {label:'', val:null, cls:'spacer'},
+    {label:'Resultado antes impuesto', val:rai, cls:'total '+(rai>=0?'positive':'negative')},
+    {label:'PPM del ejercicio', val:imp>0?-imp:0, cls:''},
+    {label:'', val:null, cls:'spacer'},
+    {label:'Resultado del ejercicio', val:rn, cls:'total '+(rn>=0?'positive':'negative')},
+  ];
+  document.getElementById('result-table').innerHTML=rows.map(r=>
+    r.cls==='spacer'
+      ?`<div class="res-row spacer"></div>`
+      :`<div class="res-row ${r.cls}">
+          <span>${r.label}</span>
+          <span>${r.val!==null?fmtFull(r.val):'—'}</span>
+        </div>`
+  ).join('');
+}
+
+function renderCompChart() {
+  const isDark=matchMedia('(prefers-color-scheme: dark)').matches;
+  const gridC=isDark?'rgba(255,255,255,.08)':'rgba(0,0,0,.07)';
+  const tickC='#888780';
+  const labels=PERIODOS;
+  const ings=labels.map((_,i)=>['res','ofi','con'].reduce((s,k)=>s+DATA.ingresos[k][i],0));
+  const gass=labels.map((_,i)=>getGas(['ene','feb','mar'][i]));
+  const ress=ings.map((v,i)=>v-gass[i]);
+
+  if(compChart) compChart.destroy();
+  compChart=new Chart(document.getElementById('compChart'),{
+    type:'bar',
+    data:{
+      labels,
+      datasets:[
+        {label:'Ingresos', data:ings, backgroundColor:'#378ADD', borderWidth:0, borderRadius:3},
+        {label:'Gastos', data:gass, backgroundColor:'#D85A30', borderWidth:0, borderRadius:3},
+        {label:'Resultado', data:ress, backgroundColor:'#3B6D11', borderWidth:0, borderRadius:3, type:'bar'},
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmtFull(c.raw)}}},
+      scales:{
+        x:{grid:{display:false},ticks:{color:tickC,font:{size:11}},border:{display:false}},
+        y:{beginAtZero:true,grid:{color:gridC},ticks:{color:tickC,font:{size:11},callback:v=>fmtShort(v)},border:{display:false}}
+      }
+    }
+  });
+}
+
+function initDashboard() {
+  render();
+}
+
+if(sessionStorage.getItem('liv_auth')==='1') initDashboard();
+</script>
+</body>
+</html>
