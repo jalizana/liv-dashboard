@@ -6,6 +6,7 @@ on:
       - 'data/**.xlsx'
       - 'data/**.csv'
       - 'scripts/parse_finances.py'
+  workflow_dispatch:
 
 jobs:
   update:
