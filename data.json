@@ -1,0 +1,58 @@
+{
+  "meta": {
+    "empresa": "LIV Administración SpA",
+    "rut": "78.151.173-0",
+    "ultimo_periodo": "2026-03",
+    "generado": "2026-04-16"
+  },
+  "periodos": [
+    { "id": "2026-01", "label": "Enero 2026" },
+    { "id": "2026-02", "label": "Febrero 2026" },
+    { "id": "2026-03", "label": "Marzo 2026" }
+  ],
+  "ingresos": {
+    "2026-01": { "residencial": 0, "oficinas": 0, "condominios": 0 },
+    "2026-02": { "residencial": 0, "oficinas": 0, "condominios": 0 },
+    "2026-03": { "residencial": 430283, "oficinas": 0, "condominios": 0 }
+  },
+  "gastos": {
+    "2026-01": {},
+    "2026-02": {},
+    "2026-03": {
+      "5201": { "nombre": "Software y plataformas", "monto": 19990 },
+      "5203": { "nombre": "Servicios de terceros", "monto": 0 },
+      "5401": { "nombre": "Materiales y suministros", "monto": 5034 },
+      "5405": { "nombre": "Combustible y movilización", "monto": 47638 },
+      "5501": { "nombre": "Comisiones bancarias", "monto": 419 },
+      "5502": { "nombre": "Intereses y cargos financieros", "monto": 108 },
+      "5601": { "nombre": "IVA no recuperable", "monto": 7409 },
+      "5602": { "nombre": "PPM del ejercicio", "monto": 538 },
+      "5603": { "nombre": "Gastos sin respaldo tributario", "monto": 500 }
+    }
+  },
+  "gastos_diferidos": {
+    "2026-03": {
+      "5201_diferido": { "nombre": "Microsoft (fact. tipo 46 pendiente)", "monto": 12027 }
+    }
+  },
+  "f29": {
+    "2026-02": {
+      "folio": "8845106636",
+      "presentado": "2026-03-04",
+      "cod504": 156551,
+      "cod537": 156551,
+      "cod77": 156551,
+      "cod91": 0,
+      "cod563": 0
+    },
+    "2026-03": {
+      "folio": "8946626306",
+      "presentado": "2026-04-16",
+      "cod504": 156551,
+      "cod537": 171188,
+      "cod77": 89434,
+      "cod91": 538,
+      "cod563": 430284
+    }
+  }
+}
